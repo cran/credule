@@ -2,7 +2,7 @@
 \alias{credule-package}
 \docType{package}
 \title{
-Credit Default Swap package
+Credit Default Swap pricing and Credit Curve bootstrapping
 }
 \description{
 Functions to bootstrap credit curve from Credit Default Swap spreads and to price Credit Default Swap from credit curve.
@@ -11,7 +11,7 @@ Functions to bootstrap credit curve from Credit Default Swap spreads and to pric
 \tabular{ll}{
 Package: \tab credule\cr
 Type: \tab Package\cr
-Version: \tab 0.1\cr
+Version: \tab 0.1.2\cr
 Date: \tab 2015-07-16\cr
 License: \tab MIT + file LICENSE\cr
 }
@@ -23,6 +23,8 @@ Maintainer: Bertrand Le Nezet <bertrand dot lenezet at gmail dot com>
 }
 \keyword{ package }
 \examples{
+library(credule)
+
 yieldcurveTenor = c(1,2,3,4,5,7)
 yieldcurveRate = c(0.0050,0.0070,0.0080,0.0100, 0.0120,0.0150)
 creditcurveTenor = c(1,3,5,7)

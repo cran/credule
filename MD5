@@ -1,11 +1,11 @@
-f8b3c3e860b56e9cd4addd9d8b6f7ddb *DESCRIPTION
+1dbe75784f81d9085c248a41476230b8 *DESCRIPTION
 63423c000e1cff45c286862a93bb511e *LICENSE
 de693e08de15e4a024f760b34d2e2e7a *NAMESPACE
-d41d8cd98f00b204e9800998ecf8427e *R/credule-Ex.R
 abfb52201fd0c7dd0a154842883f423a *R/credule.R
-2afa2b14378027c36f17ffb941ba5bd1 *man/bootstrapCDS.Rd
-af4a81699fc96b8b44709289347d36d0 *man/credule-package.Rd
-9f9eef9fa56baed007c800c0ee7bdaa3 *man/priceCDS.Rd
+356bd809ce986314d8ecfbe8cd7303de *man/bootstrapCDS.Rd
+103eb33096a3ec47ed70962204f38299 *man/credule-package.Rd
+b0abe9c50b7c5efe5afc98435ab9f73a *man/priceCDS.Rd
 adc5fbd4c6390adcb71f4b4b1b5546ab *src/brent.c
 05c074abcd3ef65bc40b392927076521 *src/brent.h
-aba7bdb2c90a9f02dfaaf698d896e809 *src/credule.c
+a0bc94bde960bc76358a4b2b73f4e0b6 *src/credule.c
+27ccb05b6eb6580480d39c0e474deb34 *src/credule.h

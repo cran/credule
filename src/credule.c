@@ -2,6 +2,7 @@
 #include <math.h>
 
 # include "brent.h"
+# include "credule.h"
 
 //-------------------------------------------------------
 // TODO:
@@ -11,6 +12,10 @@
 //
 //
 //-------------------------------------------------------
+
+// Global static variable
+static struct paramFindParSpread globalParamFindParSpread; 
+static struct paramFindHazardRate globalParamFindHazardRate; 
 
 // internal functions
 double getDiscountFactor(double *yieldcurve, int nyieldcurve, double t) 
@@ -133,6 +138,9 @@ void printCreditCurve(double *creditcurve, int ncreditcurve){
 }
 
 double calculatePremiumLeg(double *creditcurve, int ncreditcurve, double *yieldcurve, int nyieldcurve, double cdsMaturity, int numberPremiumPerYear,int accruedPremiumFlag, double spread, double h) {
+	/*Rprintf("creditcurve[0]=%f, ncreditcurve=%d, yieldcurve[0]=%f, nyieldcurve=%d, cdsMaturity=%f, numberPremiumPerYear=%d, numberPremiumPerYear=%d, accruedPremiumFlag=%, h=%f",creditcurve[0],ncreditcurve,yieldcurve[0],nyieldcurve,cdsMaturity,numberPremiumPerYear, numberPremiumPerYear,accruedPremiumFlag,h);*/
+	//Rprintf("creditcurve[0]=%f, ncreditcurve=%d, yieldcurve[0]=%f, nyieldcurve=%d\n",creditcurve[0],ncreditcurve,yieldcurve[0],nyieldcurve);
+	
 	double *creditcurveTenor = &creditcurve[0];
 	//double *creditcurveSurvivalProbability = &creditcurve[ncreditcurve];
 	int max_time_index = ncreditcurve - 1;
@@ -271,6 +279,52 @@ double calculateDefaultLeg(double *creditcurve, int ncreditcurve, double *yieldc
 	}	
 }
 
+
+double objfunFindParSpread(double spread) {
+	double result = 
+	calculatePremiumLeg(globalParamFindParSpread.creditcurve,
+						globalParamFindParSpread.creditcurveLength,
+						globalParamFindParSpread.yieldcurve,
+						globalParamFindParSpread.yieldcurveLength,
+						globalParamFindParSpread.cdsTenor,
+						globalParamFindParSpread.premiumFrequency,
+						globalParamFindParSpread.accruedPremium,
+						spread,
+						globalParamFindParSpread.hazardRate) -
+	calculateDefaultLeg(globalParamFindParSpread.creditcurve,
+						globalParamFindParSpread.creditcurveLength,
+						globalParamFindParSpread.yieldcurve,
+						globalParamFindParSpread.yieldcurveLength,
+						globalParamFindParSpread.cdsTenor,
+						globalParamFindParSpread.defaultFrequency,
+						globalParamFindParSpread.recoveryRate,
+						globalParamFindParSpread.hazardRate);
+	return(result);
+}
+
+double objfunFindHazardRate(double h) {
+	double result = 
+	calculatePremiumLeg(globalParamFindHazardRate.creditcurve,
+						globalParamFindHazardRate.creditcurveLength,
+						globalParamFindHazardRate.yieldcurve,
+						globalParamFindHazardRate.yieldcurveLength,
+						globalParamFindHazardRate.cdsTenor,
+						globalParamFindHazardRate.premiumFrequency,
+						globalParamFindHazardRate.accruedPremium,
+						globalParamFindHazardRate.spread,
+						h) -
+	calculateDefaultLeg(globalParamFindHazardRate.creditcurve,
+						globalParamFindHazardRate.creditcurveLength,
+						globalParamFindHazardRate.yieldcurve,
+						globalParamFindHazardRate.yieldcurveLength,
+						globalParamFindHazardRate.cdsTenor,
+						globalParamFindHazardRate.defaultFrequency,
+						globalParamFindHazardRate.recoveryRate,
+						h);
+	return(result);
+}
+
+// functions exposed to R
 void priceCreditDefaultSwapSpreads(double *yieldcurve, int *nyieldcurve, double *creditcurve, int *ncreditcurve, double *cdsTenors, int *ncdsTenors, int *numberPremiumPerYear, int *numberDefaultIntervalPerYear, int *accruedPremiumFlag, double *recoveryRate, double *spreads, int * warningFlag) {
 	int yieldcurveLength = nyieldcurve[0];
 	int creditcurveLength = ncreditcurve[0];
@@ -285,13 +339,7 @@ void priceCreditDefaultSwapSpreads(double *yieldcurve, int *nyieldcurve, double 
 	double matchep = 2.220446049250313E-016;
 	double t = matchep;
 	
-	for (int i=0; i < cdsTenorsLength; i++) {
-		double objfun(double spread) {
-			double result = calculatePremiumLeg(creditcurve,creditcurveLength,yieldcurve,yieldcurveLength,cdsTenors[i],premiumFrequency,accruedPremium, spread,0) - 
-			calculateDefaultLeg(creditcurve,creditcurveLength,yieldcurve,yieldcurveLength,cdsTenors[i],defaultFrequency,RR,0);
-			return(result);
-		};
-	
+	for (int i=0; i < cdsTenorsLength; i++) {	
 		/*double premleg = calculatePremiumLeg(yieldcurve,yieldcurveLength,creditcurve,creditcurveLength,cdsTenors[i],4,0.0050);
 		double defaultleg = calculateDefaultLeg(yieldcurve,yieldcurveLength,creditcurve,creditcurveLength,cdsTenors[i],4,0.40);
 		double spread = calculateCreditDefaultSwapSpread(yieldcurve,yieldcurveLength,creditcurve,creditcurveLength,cdsTenors[i],4,0.40);
@@ -299,7 +347,18 @@ void priceCreditDefaultSwapSpreads(double *yieldcurve, int *nyieldcurve, double 
 		Rprintf("Default Leg: %f\n",defaultleg);
 		Rprintf("Spread: %f\n",spread);	
 		*/
-		spreads[i] = zero(lower,upper,matchep,t,objfun);
+		globalParamFindParSpread.creditcurve = creditcurve;
+		globalParamFindParSpread.creditcurveLength = creditcurveLength;
+		globalParamFindParSpread.yieldcurve = yieldcurve;
+		globalParamFindParSpread.yieldcurveLength = yieldcurveLength;
+		globalParamFindParSpread.cdsTenor = cdsTenors[i];
+		globalParamFindParSpread.premiumFrequency = premiumFrequency;
+		globalParamFindParSpread.defaultFrequency = defaultFrequency;
+		globalParamFindParSpread.accruedPremium = accruedPremium;
+		globalParamFindParSpread.recoveryRate = RR;
+		globalParamFindParSpread.hazardRate = 0;
+		
+		spreads[i] = zero(lower,upper,matchep,t,objfunFindParSpread);
 		if (spreads[i] == lower || spreads[i] == upper) *warningFlag = 1;
 		
 		//double premleg = calculatePremiumLeg(yieldcurve,yieldcurveLength,creditcurve,creditcurveLength,cdsTenors[i],freq,spreads[i],0);
@@ -307,6 +366,7 @@ void priceCreditDefaultSwapSpreads(double *yieldcurve, int *nyieldcurve, double 
 		//Rprintf("Premium Leg: %f, Default Leg: %f\n",premleg, defaultleg);
 	}	
 }
+
 
 void bootstrapCreditDefaultSwapSpreads(double *yieldcurve, int *nyieldcurve, double *cdsTenors, int *ncdsTenors, double *spreads, int *numberPremiumPerYear, int *numberDefaultIntervalPerYear, int *accruedPremiumFlag, double *recoveryRate, double *output, int * warningFlag) {
 	int yieldcurveLength = nyieldcurve[0];
@@ -329,13 +389,24 @@ void bootstrapCreditDefaultSwapSpreads(double *yieldcurve, int *nyieldcurve, dou
 	double hazrate[cdsTenorsLength];
 	
 	for (int i=0; i < cdsTenorsLength; i++) {		
-		double objfun(double h) {
+		/*double objfun(double h) {
 		double result = calculatePremiumLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsTenors[i],premiumFrequency,accruedPremium, spreads[i],h) - calculateDefaultLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsTenors[i],defaultFrequency,RR,h);
 			//Rprintf("objfun (h=%f) ==> %f\n",h,result);
 			return(result);
-		};
+		};*/
 		
-		double h = zero(lower,upper,matchep,t,objfun);
+		globalParamFindHazardRate.creditcurve = newcreditcurve;
+		globalParamFindHazardRate.creditcurveLength = newcreditcurveLength;
+		globalParamFindHazardRate.yieldcurve = yieldcurve;
+		globalParamFindHazardRate.yieldcurveLength = yieldcurveLength;
+		globalParamFindHazardRate.cdsTenor = cdsTenors[i];
+		globalParamFindHazardRate.premiumFrequency = premiumFrequency;
+		globalParamFindHazardRate.defaultFrequency = defaultFrequency;
+		globalParamFindHazardRate.accruedPremium = accruedPremium;
+		globalParamFindHazardRate.recoveryRate = RR;
+		globalParamFindHazardRate.spread = spreads[i];
+		
+		double h = zero(lower,upper,matchep,t,objfunFindHazardRate);
 		if (h == lower || h == upper) *warningFlag = 1;
 		
 		/*Rprintf("hazardrate=%f, PremiumLeg=%f , DefaultLeg=%f\n",
@@ -356,290 +427,3 @@ void bootstrapCreditDefaultSwapSpreads(double *yieldcurve, int *nyieldcurve, dou
 	}	
 }
 
-
-// -----------------------------------
-// Tests
-// -----------------------------------
-
-void test1(double *yieldcurve, int *nyieldcurve, double *creditcurve, int *ncreditcurve) {
-	int i;
-	int yieldcurveLength = nyieldcurve[0];
-	int creditcurveLength = ncreditcurve[0];
-	
-	// browse yieldcurve
-	for (i=0; i < yieldcurveLength; i++) {
-		Rprintf("tenor: %f, disc. rate: %f\n",yieldcurve[i],yieldcurve[yieldcurveLength + i]);
-	}
-	
-	// browse creditcurve
-	for (i=0; i < creditcurveLength; i++) {
-		Rprintf("tenor: %f, surv. prob: %f\n",creditcurve[i],creditcurve[creditcurveLength + i]);
-	}
-	
-	Rprintf("getDiscountFactor\n");
-	Rprintf("tenor: %f, df: %f\n",2.5,getDiscountFactor(yieldcurve,yieldcurveLength,2.5));
-	Rprintf("tenor: %f, df: %f\n",0.0,getDiscountFactor(yieldcurve,yieldcurveLength,0.0));
-	Rprintf("tenor: %f, df: %f\n",5.0,getDiscountFactor(yieldcurve,yieldcurveLength,5.0));
-	Rprintf("tenor: %f, df: %f\n",4.0,getDiscountFactor(yieldcurve,yieldcurveLength,4.0));
-	Rprintf("tenor: %f, df: %f\n",0.5,getDiscountFactor(yieldcurve,yieldcurveLength,0.5));
-	Rprintf("tenor: %f, df: %f\n",3.5,getDiscountFactor(yieldcurve,yieldcurveLength,3.5));
-	
-	Rprintf("getSurvivalProbability\n");
-	Rprintf("tenor: %f, df: %f\n",2.5,getSurvivalProbability(creditcurve,creditcurveLength,2.5));
-	Rprintf("tenor: %f, df: %f\n",7.0,getSurvivalProbability(creditcurve,creditcurveLength,7.0));
-	Rprintf("tenor: %f, df: %f\n",8.0,getSurvivalProbability(creditcurve,creditcurveLength,8.0));
-	Rprintf("tenor: %f, df: %f\n",0.5,getSurvivalProbability(creditcurve,creditcurveLength,0.5));
-	Rprintf("tenor: %f, df: %f\n",6.0,getSurvivalProbability(creditcurve,creditcurveLength,6.0));
-	Rprintf("tenor: %f, df: %f\n",5.0,getSurvivalProbability(creditcurve,creditcurveLength,5.0));
-	Rprintf("tenor: %f, df: %f\n",6.5,getSurvivalProbability(creditcurve,creditcurveLength,6.5));
-	
-	//double zero ( double a, double b, double machep, double t, 
-    //double f ( double x ) )
-	double f(double x) {
-		return(2*x*x*x-5*x*x+4*x-3);
-	};
-	double sol;
-	sol = zero(0.0,10.0,10e-8,10E-8,f);
-	Rprintf("solution: %f\n",sol);
-	
-	double premleg = calculatePremiumLeg(yieldcurve,yieldcurveLength,creditcurve,creditcurveLength,3.0,4,0,0.0050,0);
-	double defaultleg = calculateDefaultLeg(yieldcurve,yieldcurveLength,creditcurve,creditcurveLength,3.0,4,0.40,0);
-	Rprintf("Premium Leg: %f\n",premleg);
-	Rprintf("Default Leg: %f\n",defaultleg);
-	
-
-	
-}
-
-void test2(double *yieldcurve, int *nyieldcurve) {
-	// test bootstraping
-	Rprintf("- - - - - - - - - - - - - - - - \n");	
-	Rprintf("Bootstraping test\n");	
-	Rprintf("- - - - - - - - - - - - - - - - \n");
-	
-	int yieldcurveLength = nyieldcurve[0];
-	int newcreditcurveLength = 0;
-	double *newcreditcurve;
-	newcreditcurve = malloc(newcreditcurveLength * 2 * sizeof(double));
-	memset(newcreditcurve , 0 , newcreditcurveLength * 2 * sizeof(* newcreditcurve));
-	
-	double RR = 0.40;
-	int freq = 4;
-	double lower = 0.0;
-	double upper = 30.0;
-	double matchep = 2.220446049250313E-016;
-	double t = matchep;
-	
-	// first tenor 
-	double cdsMaturity = 1;
-	double cdsSpread = 0.0050; // 50bp
-	
-	double objfun1(double h) {
-		double result = calculatePremiumLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsMaturity,freq,0,cdsSpread,h) - 
-		calculateDefaultLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsMaturity,freq,RR,h);
-		Rprintf("objfun1 (h=%f) ==> %f\n",h,result);
-		return(result);
-	};		
-	double h1 = zero(lower,upper,matchep,t,objfun1);
-	double sp1 = exp(-h1*cdsMaturity);
-	Rprintf("h1=: %f\n",h1);
-	Rprintf("SurvProb1=: %f\n",sp1);
-	/*
-	newcreditcurveLength = 1;
-	newcreditcurve = malloc(newcreditcurveLength * 2 * sizeof(double));
-	newcreditcurve[0] = cdsMaturity;
-	newcreditcurve[0 + newcreditcurveLength] = sp1;
-	*/
-	addTenorToCreditCurve(&newcreditcurve,&newcreditcurveLength,cdsMaturity,sp1);
-	
-	// second tenor
-	cdsMaturity = 2;
-	cdsSpread = 0.0050; // 80bp
-	
-	double objfun2(double h) {
-		double result = calculatePremiumLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsMaturity,freq,0,cdsSpread,h) - 
-		calculateDefaultLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsMaturity,freq,RR,h);
-		Rprintf("objfun2 (h=%f) ==> %f\n",h,result);
-		return(result);
-	};
-	
-	double h2 = zero(lower,upper,matchep,t,objfun2);
-	double sp2 = exp(-h2*cdsMaturity)*sp1;
-	Rprintf("h2=: %f\n",h2);
-	Rprintf("SurvProb2=: %f\n",sp2);
-	
-	/*
-	newcreditcurveLength = 2;
-	double *tmp = malloc(newcreditcurveLength * 2 * sizeof(double));
-	tmp[0] = newcreditcurve[0];
-	tmp[0 + newcreditcurveLength] = newcreditcurve[1];
-	tmp[1] = cdsMaturity;
-	tmp[1 + newcreditcurveLength] = h2;
-	newcreditcurve = tmp;
-	*/
-	addTenorToCreditCurve(&newcreditcurve,&newcreditcurveLength,cdsMaturity,sp2);
-	
-	// third tenor
-	cdsMaturity = 3;
-	cdsSpread = 0.0050; // 100bp
-	
-	double objfun3(double h) {
-		double result = calculatePremiumLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsMaturity,freq,0,cdsSpread,h) - 
-		calculateDefaultLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,cdsMaturity,freq,RR,h);
-		Rprintf("objfun3 (h=%f) ==> %f\n",h,result);
-		return(result);
-	};
-	
-	double h3 = zero(lower,upper,matchep,t,objfun3);
-	double sp3 = exp(-h3*cdsMaturity)*sp2;
-	Rprintf("h3=: %f\n",h3);
-	Rprintf("SurvProb2=: %f\n",sp3);
-	
-}
-
-void test3() {
-	/*
-	int bnlcurvelength = 0;
-	double *blncurve;
-	blncurve = malloc(bnlcurvelength * 2 * sizeof(double));
-	printCreditCurve(blncurve,bnlcurvelength);
-	
-	addTenorToCreditCurve(blncurve,&bnlcurvelength,0.5,0.002);
-	printCreditCurve(blncurve,bnlcurvelength);
-	
-	addTenorToCreditCurve(blncurve,&bnlcurvelength,1.0,0.007);
-	printCreditCurve(blncurve,bnlcurvelength);
-*/
-	int bnlcurve2length = 0;
-	double* blncurve2 = calloc(bnlcurve2length * 2, sizeof(double));
-	
-	/*
-	int bnlcurve2length = 1;
-	double* blncurve2 = calloc(bnlcurve2length * 2, sizeof(double));
-	blncurve2[0] = 1.0;
-	blncurve2[1] = 0.07;
-	printCreditCurve(blncurve2,bnlcurve2length);
-	*/
-	/*
-	bnlcurve2length = 2;
-	blncurve2 = realloc(blncurve2, bnlcurve2length * 2 * sizeof(double));
-	blncurve2[0] = 1.0;
-	blncurve2[2] = 0.07;
-	
-	blncurve2[1] = 2.0;
-	blncurve2[3] = 0.09;
-	printCreditCurve(blncurve2,bnlcurve2length);
-	*/
-	
-	addTenorToCreditCurve(&blncurve2,&bnlcurve2length,2.0,0.008);
-	printCreditCurve(blncurve2,bnlcurve2length);
-	
-	addTenorToCreditCurve(&blncurve2,&bnlcurve2length,3.0,0.00666);
-	printCreditCurve(blncurve2,bnlcurve2length);
-	
-	//
-	//printCreditCurve(blncurve2,bnlcurve2length);
-
-}
-
-void test4(double *yieldcurve, int *nyieldcurve) {
-	// test bootstraping
-	Rprintf("- - - - - - - - - - - - - - - - \n");	
-	Rprintf("Bootstraping test\n");	
-	Rprintf("- - - - - - - - - - - - - - - - \n");
-	
-	int yieldcurveLength = nyieldcurve[0];
-	
-	int newcreditcurveLength = 0;
-	double *newcreditcurve;
-	initializeCreditCurve(&newcreditcurve,&newcreditcurveLength);	
-	printCreditCurve(newcreditcurve,newcreditcurveLength);
-	
-	double tenors[5] = {0.5,1.0,2.0,3.0,5.0};
-	//double spreads[5] = {0.0050,0.0060,0.0070,0.0080,0.0090};
-	double spreads[5] = {0.3000,0.1200,0.0900,0.0850,0.0850};
-	double survprob[5] = {};
-	double hazrate[5] = {};
-	
-	double RR = 0.40;
-	int freq = 4;
-	double lower = 0.0;
-	double upper = 30.0;
-	double matchep = 2.220446049250313E-016;
-	double t = matchep;
-		
-	
-	for (int i=0; i<5; i++) {
-		double objfun(double h) {
-		double result = calculatePremiumLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,tenors[i],freq,0,spreads[i],h) - 
-			calculateDefaultLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,tenors[i],freq,RR,h);
-			Rprintf("objfun (h=%f) ==> %f\n",h,result);
-			return(result);
-		};
-
-		double h = zero(lower,upper,matchep,t,objfun);
-		hazrate[i] = h;
-		if (i == 0) survprob[i] = exp(-hazrate[i]*tenors[i]);
-		else survprob[i] = survprob[i-1]*exp(-hazrate[i]*tenors[i]);
-		
-		Rprintf("h[%d]= %f / %f\n",i,hazrate[i],survprob[i]);
-		
-		addTenorToCreditCurve(&newcreditcurve,&newcreditcurveLength,tenors[i],survprob[i]);
-	}
-	
-	printCreditCurve(newcreditcurve,newcreditcurveLength);
-}
-
-void test5() {
-	
-	double yieldcurve[12] = {1.0, 2.0, 3.0, 4.0, 5.0, 7.0, 0.0050, 0.0070, 0.0080, 0.0100, 0.0120, 0.0150};
-	int nyieldcurve = 6;
-	int yieldcurveLength = nyieldcurve;
-	
-	int newcreditcurveLength = 0;
-	double *newcreditcurve;
-	initializeCreditCurve(&newcreditcurve,&newcreditcurveLength);	
-	printCreditCurve(newcreditcurve,newcreditcurveLength);
-	
-	double tenors[1] = {1.0};
-	double spreads[1] = {0.0050};
-	double survprob[1] = {};
-	double hazrate[1] = {};
-	
-	double RR = 0.40;
-	int freq = 4;
-	double lower = 0.0;
-	double upper = 30.0;
-	double matchep = 2.220446049250313E-016;
-	double t = matchep;
-	
-	for (int i=0; i<1; i++) {
-		double objfun(double h) {
-		double result = calculatePremiumLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,tenors[i],freq,0,spreads[i],h) - 
-			calculateDefaultLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,tenors[i],freq,RR,h);
-			Rprintf("objfun (h=%f) ==> %f\n",h,result);
-			return(result);
-		};
-
-		double h = zero(lower,upper,matchep,t,objfun);
-		hazrate[i] = h;
-		if (i == 0) survprob[i] = exp(-hazrate[i]*tenors[i]);
-		else survprob[i] = survprob[i-1]*exp(-hazrate[i]*tenors[i]);
-		
-		Rprintf("h[%d]= %f / %f\n",i,hazrate[i],survprob[i]);		
-		addTenorToCreditCurve(&newcreditcurve,&newcreditcurveLength,tenors[i],survprob[i]);
-	}
-	printCreditCurve(newcreditcurve,newcreditcurveLength);
-	
-	Rprintf("1Y SP:{%f}\n",getSurvivalProbability(newcreditcurve,newcreditcurveLength,1.0));
-	
-	double h = 0.150;
-    double spread = 0.0080;
-	double tenor = 2.0;
-	
-	double premLeg = calculatePremiumLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,tenor,freq,0,spread,h);
-	double defaultLeg = calculateDefaultLeg(newcreditcurve,newcreditcurveLength,yieldcurve,yieldcurveLength,tenor,freq,RR,h);
-	
-	Rprintf("h= %f, spread=%f, premLeg=%f, defaultLeg=%f\n",h,spread,premLeg,defaultLeg);		
-
-}
