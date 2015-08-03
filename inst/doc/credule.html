@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Credit Curve Bootstrapping Methodology</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: #990073
+   }
+
+   pre .number {
+     color: #099;
+   }
+
+   pre .comment {
+     color: #998;
+     font-style: italic
+   }
+
+   pre .keyword {
+     color: #900;
+     font-weight: bold
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: #d14;
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+<!-- MathJax scripts -->
+<script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+</script>
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p>We will first explain how credit curves are constructed (using a reduced-form model) before showing how the credule package can be used to build credit curves from the CDS quotes. We will look at 2 specific US Issuers as of 27 May 2014: Pfizer (Pfizer Inc - PFE) and Radioshak (RadioShack Corp - RSH).</p>
+
+<h2>Credit Curve Bootstrapping Methodology</h2>
+
+<h3>Hazard rate and Survival Probability</h3>
+
+<p>The reduced-form model that we use here is based on the work of Jarrow and Turnbull (1995), who characterize a credit event as the first event of a Poisson counting process which occurs at some time \(t\) with a probability defined as
+:</p>
+
+<p>\(\text{Pr}\left[\tau<t+dt\,|\,\tau\geq t\right]=\lambda(t)dt\)</p>
+
+<p>the probability of a default occurring within the time interval [t,t+dt) conditional on surviving to time t, is proportional to some time dependent function \(\lambda(t)\), known as the hazard rate, and the length of the time interval dt. We make the simplifying assumption that the hazard rate process is deterministic. By extension, this assumption also implies that the hazard rate is independent of interest rates and recovery rates. From this definition, we can calculate the continuous time survival probability to the time \(T\) conditional on surviving to the valuation time \(t_{V}\) by considering the limit \(\rightarrow0\). It can be shown that the survival probability is given by:</p>
+
+<p>\(Q(t_{V},T)=\exp\left(-\int_{t_{V}}^{T}\lambda(s)\, ds\right)\)</p>
+
+<p>Finally, we assume that the hazard rate function is a step-wise constant function. In the below example, the hazard rate between time 0 and 1Y is \(h_{0,1}=1\%\) and the hazard rate between between 1Y and 3Y is \(h_{1,3}=2.5\%\). Therefore we have the 1Y survival probability \(Q_{0,1}=exp(-h_{0,1}\times1)=99\%\) and the 3Y survival probability \(Q_{1,3}=Q_{0,1}*exp(-h_{1,3}\times2)=91.9\%\).</p>
+
+<table><thead>
+<tr>
+<th align="left">tenor</th>
+<th align="left">hazardrate</th>
+<th align="left">survprob</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">1</td>
+<td align="left">1.00%</td>
+<td align="left">99.00%</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">2.50%</td>
+<td align="left">91.85%</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">3.00%</td>
+<td align="left">79.06%</td>
+</tr>
+<tr>
+<td align="left">7</td>
+<td align="left">4.00%</td>
+<td align="left">59.75%</td>
+</tr>
+</tbody></table>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-3"/> <img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-3"/> </p>
+
+<h3>Valuing the Premium Leg</h3>
+
+<p>The premium leg is the series of payments of the default swap spread made to maturity or to the time of the credit event, whichever occurs first. It also includes the payment of premium accrued from the previous premium payment date until the time of the credit event. Assume that there are \(n=1,&hellip;,N\) contractual payment dates \(t_1,&hellip; ,t_N\) where \(t_N\) is the maturity date of the default swap. </p>
+
+<p>The present value of the premium leg is given by:</p>
+
+<p>\(\text{PL PV}(t_{V},t_{N})=S(t_{0},t_{N})\sum_{n=1}^{N}\Delta(t_{n-1},t_{n},B)Z(t_{V},t_{n})\left[Q(t_{V},t_{n})+\frac{1_{PA}}{2}(Q(t_{V},t_{n-1})-Q(t_{V},t_{n}))\right]\)</p>
+
+<p>where:</p>
+
+<ul>
+<li>N is the total number of premiums. \(n=1,\ldots,N\) is the index for these premiums; premium dates are denoted \(t_{1},\ldots,t_{N}\). \(t_{N}\) is the maturity date of the swap</li>
+<li>\(S(t_{0},t_{N})\) is the spread of a Credit Default Swap that matures on \(t_{N}\)</li>
+<li>\(\Delta(t_{n-1},t_{n},B)\) is the day count fraction between premium dates \(t_{n-1}\) and \(t_{n}\) in the appropriate basis convention denoted by B (ACT/360 in our model)</li>
+<li>\(Q(t_{V},t_{n})\) is the arbitrage-free survival probability of the reference entity from valuation time \(t_{V}\) to premium time \(t_{n}\)</li>
+<li>\(Z(t_{V},t_{n})\) is the risk-free discount factor from valuation date to the premium date \(n\)</li>
+<li>$1_{PA}$equals 1 if premium accrued (PA) are included in the premium leg calculation, 0 otherwise. </li>
+</ul>
+
+<h3>Valuing the Default Leg</h3>
+
+<p>The default leg (or protection leg) is the contingent payment of (100\% - R) on the face value of the protection made following the credit event. R is the expected recovery rate.
+In pricing the default leg, it is important to take into account the timing of the credit event because this can have a significant effect on the present value of the protection leg especially for longer maturity default swaps. Within the hazard rate approach we can solve this timing problem by conditioning on each small time interval \([s,s+ds]\) between time \(t_V\) and time \(t_N\) at which the credit event can occur. We calculate the expected present value of
+the recovery payment as:</p>
+
+<p>\(\text{DL PV}(t_{V},t_{N})=(1-R)\int_{t_{V}}^{t_{N}}Z(t_{V},s)Q(t_{V},s)\lambda(s)ds\)</p>
+
+<p>The integral makes this expression tedious to evaluate. It is possible to show that we can, without any material loss of accuracy, simply assume that the credit event can only occur on a finite number M of discrete points per year. In this case, the default leg value can be expressed as:</p>
+
+<p>\(\text{DL PV}(t_{V},t_{N})=(1-R)\sum_{m=1}^{M\times t_{N}}Z(t_{V},t_{m})\left(Q(t_{V},t_{m-1})-Q(t_{V},t_{m})\right)\)</p>
+
+<p>where:</p>
+
+<ul>
+<li>M is the number of discrete points per year on which we assume a credit event can happen. \(t_{N}\) is the maturity of the swap. \(m=1,\ldots,M\times t_{N}\) is the index the discrete point on which a credit event can happen between the valuation date and the maturity of the swap. We choose \(M=12\) (monthly discretization) to keep the computation lightweight. D. O\&#39;kane and S. Turnbull (2003) compare the results of a daily discretization (\(M=365\)) and a monthly discretization (\(M=12\)) and shows that monthly intervals has an absolute error which is well inside the bid-offer spread; hence monthly discretization can be used to keep the model fast and simple.</li>
+<li>\(R\) is the recovery rate</li>
+<li>\(Q(t_{V},t_{m})\) is the arbitrage-free survival probability of the reference entity from valuation time \(t_{V}\) to premium time \(t_{m}\)</li>
+<li>\(Z(t_{V},t_{m})\) is the risk-free discount factor from valuation date to the date m</li>
+</ul>
+
+<h3>Calibration of the Credit Curve</h3>
+
+<p>Calibration of the model imply finding an hazard rate (non-cumulative hazard rate) function that matches the market CDS spreads. We make the following assumptions:</p>
+
+<ul>
+<li>Swap premium payments are made quarterly following a business day calendar</li>
+<li>Hazard rate is a piece-wise constant function of time (i.e. hazard rates are independent from interest rates)</li>
+<li>Recovery rate is constant</li>
+</ul>
+
+<p>The construction of the hazard rate term structure is done by an iterative process called bootstrapping. Let&#39;s assume we have quotes for 1Y, 3Y, 5Y and 7Y for a given issuer. From the 1Y CDS spread \(s_{1Y}\), we will find the hazard rate \(\lambda_{0,1}\) which equates the present value of the premium leg and of the protection leg. From the 3Y spread \(s_{3Y}\), we will find the hazard rate \(\lambda_{1,3}\) which equates the present value of the premium leg to the present value of the protection leg. By iterating this process, we obtain the hazard rates: \(\lambda_{0,1},\lambda_{1,3},\lambda_{3,5},\lambda_{5,7}\). We can also easily calculate the survival probabilities from this hazard rate term structure (as we have seen earlier).</p>
+
+<h2>Market data</h2>
+
+<pre><code class="r">yieldcurveTenor = c(1.0,2.0,3.0,4.0,5.0,7.0,
+                    10.0,15.0,20.0,30.0)
+yieldcurveRate = c(0.002585,0.005034,0.008981,0.012954,0.016452,
+                   0.021811,0.027007,0.031718,0.033834,0.035056)
+</code></pre>
+
+<table><thead>
+<tr>
+<th align="left">1</th>
+<th align="left">2</th>
+<th align="left">3</th>
+<th align="left">4</th>
+<th align="left">5</th>
+<th align="left">7</th>
+<th align="left">10</th>
+<th align="left">15</th>
+<th align="left">20</th>
+<th align="left">30</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">0.26%</td>
+<td align="left">0.50%</td>
+<td align="left">0.90%</td>
+<td align="left">1.30%</td>
+<td align="left">1.65%</td>
+<td align="left">2.18%</td>
+<td align="left">2.70%</td>
+<td align="left">3.17%</td>
+<td align="left">3.38%</td>
+<td align="left">3.51%</td>
+</tr>
+</tbody></table>
+
+<pre><code class="r">cdsTenor = c(1,2,3,4,5,7,10,15,20,30)
+cdsSpread_PFE = c(0.0003,0.0009,0.0015,0.0021,0.0028,0.0043,0.0061,0.0063, 0.0068,0.0066)
+</code></pre>
+
+<table><thead>
+<tr>
+<th align="right">1</th>
+<th align="right">2</th>
+<th align="right">3</th>
+<th align="right">4</th>
+<th align="right">5</th>
+<th align="right">7</th>
+<th align="right">10</th>
+<th align="right">15</th>
+<th align="right">20</th>
+<th align="right">30</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="right">3</td>
+<td align="right">9</td>
+<td align="right">15</td>
+<td align="right">21</td>
+<td align="right">28</td>
+<td align="right">43</td>
+<td align="right">61</td>
+<td align="right">63</td>
+<td align="right">68</td>
+<td align="right">66</td>
+</tr>
+</tbody></table>
+
+<pre><code class="r">cdsTenor = c(1,2,3,4,5,7,10,15,20,30)
+cdsSpread_RSH = c(0.6405,0.5956,0.5511,0.5144,0.4894,0.4511,0.4156,0.3815,0.3657,0.3506)
+</code></pre>
+
+<table><thead>
+<tr>
+<th align="right">1</th>
+<th align="right">2</th>
+<th align="right">3</th>
+<th align="right">4</th>
+<th align="right">5</th>
+<th align="right">7</th>
+<th align="right">10</th>
+<th align="right">15</th>
+<th align="right">20</th>
+<th align="right">30</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="right">6405</td>
+<td align="right">5956</td>
+<td align="right">5511</td>
+<td align="right">5144</td>
+<td align="right">4894</td>
+<td align="right">4511</td>
+<td align="right">4156</td>
+<td align="right">3815</td>
+<td align="right">3657</td>
+<td align="right">3506</td>
+</tr>
+</tbody></table>
+
+<h2>Credit Curves</h2>
+
+<h3>RadioShack Corp, 27 May 2014</h3>
+
+<pre><code class="r">creditcurve_RSH = bootstrapCDS(yieldcurveTenor, yieldcurveRate, 
+                   cdsTenor, cdsSpread_RSH,
+                   RR, premiumFrequency, defaultFrequency, accruedPremium)
+</code></pre>
+
+<table><thead>
+<tr>
+<th align="left">tenor</th>
+<th align="left">survprob</th>
+<th align="left">hazrate</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">1</td>
+<td align="left">34.18%</td>
+<td align="left">107.37%</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">15.38%</td>
+<td align="left">79.84%</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">10.22%</td>
+<td align="left">40.91%</td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left">8.45%</td>
+<td align="left">18.95%</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">6.95%</td>
+<td align="left">19.61%</td>
+</tr>
+<tr>
+<td align="left">7</td>
+<td align="left">5.66%</td>
+<td align="left">10.22%</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">4.39%</td>
+<td align="left">8.51%</td>
+</tr>
+<tr>
+<td align="left">15</td>
+<td align="left">3.37%</td>
+<td align="left">5.29%</td>
+</tr>
+<tr>
+<td align="left">20</td>
+<td align="left">2.13%</td>
+<td align="left">9.16%</td>
+</tr>
+<tr>
+<td align="left">30</td>
+<td align="left">1.36%</td>
+<td align="left">4.48%</td>
+</tr>
+</tbody></table>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-13"/> </p>
+
+<h3>Pfizer Inc, 27 May 2014</h3>
+
+<pre><code class="r">creditcurve_PFE = bootstrapCDS(yieldcurveTenor, yieldcurveRate, 
+                   cdsTenor, cdsSpread_PFE,
+                   RR, premiumFrequency, defaultFrequency, accruedPremium)
+</code></pre>
+
+<table><thead>
+<tr>
+<th align="left">tenor</th>
+<th align="left">survprob</th>
+<th align="left">hazrate</th>
+</tr>
+</thead><tbody>
+<tr>
+<td align="left">1</td>
+<td align="left">99.95%</td>
+<td align="left">0.05%</td>
+</tr>
+<tr>
+<td align="left">2</td>
+<td align="left">99.70%</td>
+<td align="left">0.25%</td>
+</tr>
+<tr>
+<td align="left">3</td>
+<td align="left">99.25%</td>
+<td align="left">0.45%</td>
+</tr>
+<tr>
+<td align="left">4</td>
+<td align="left">98.59%</td>
+<td align="left">0.66%</td>
+</tr>
+<tr>
+<td align="left">5</td>
+<td align="left">97.65%</td>
+<td align="left">0.96%</td>
+</tr>
+<tr>
+<td align="left">7</td>
+<td align="left">94.92%</td>
+<td align="left">1.42%</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">89.69%</td>
+<td align="left">1.89%</td>
+</tr>
+<tr>
+<td align="left">15</td>
+<td align="left">84.71%</td>
+<td align="left">1.14%</td>
+</tr>
+<tr>
+<td align="left">20</td>
+<td align="left">78.37%</td>
+<td align="left">1.56%</td>
+</tr>
+<tr>
+<td align="left">30</td>
+<td align="left">71.27%</td>
+<td align="left">0.95%</td>
+</tr>
+</tbody></table>
+
+<p><img src="data:image/png;base64,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" alt="plot of chunk unnamed-chunk-16"/> </p>
+
+<h2>Conclusion</h2>
+
+<p>It is interesting to compare the credit curve of these 2 issuers. A quick look at the 5Y spreads (market benchmark) shows that one issuer is much more risky than the other. Pfizer 5Y spread is at 28bp (i.e. 0.28\%), this is a pretty low CDS spreads (only 3bp more than the 5Y CDS on a sovereign like Finland, as of 3 August 2015). On the other hand, Radioshack 5Y spread is at 4894bp (i.e. 48.94\%) which is a very high CDS spread. As a comparison, it is more than two times than the Greece 5Y CDS as of 3 August 2015 (2203.70bp). </p>
+
+<p>Futhermore, we can observe than the hazard rate does not have the same dynamic for both issuers. For Pfizer, the hazard rate curve is upward sloping (i.e hazard rate increase over time) whereas for Radioshack, the hazard rate curve is downward sloping. Downward sloping curve is commonly observed for stressed assets/speculative-grade firms (Radioshack rating is CCC as of 27 May 2014) and it translates the investors&#39;s expecation of a short term default. In other words, investors think that the issuer has room to improve with age (become less risky) or less potential to worsen considering that it is very risky today.</p>
+
+<h2>References</h2>
+
+<ul>
+<li>JP Morgan. Credit Derivatives: A Primer. JP Morgan Credit Derivatives and Quantitative Research (January 2005)</li>
+<li>D. O\&#39;kane and S. Turnbull. Valuation of Credit Default Swaps. Lehman Brothers Quantitative Credit Research (Apr. 2003)</li>
+<li>Standard CDS Examples. Supporting document for the Implementation of the ISDA CDS Standard Model (Oct. 2012)</li>
+</ul>
+
+</body>
+
+</html>

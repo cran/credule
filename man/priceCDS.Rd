@@ -3,18 +3,27 @@
 %- Also NEED an '\alias' for EACH other topic documented here.
 \title{Credit Default Swap Pricing}
 \description{
-    A function that calculate the spreads of a list of Credit Default Swap from a yield curve and a credit curve.
+    A function that calculates the spreads of several Credit Default Swaps (different maturities) from a yield curve and a credit curve.
+}
+\details{
+In brief, a CDS is used to transfer the credit risk of a reference entity (corporate or sovereign) from one party to another. In a standard CDS contract one party purchases credit protection from another party, to cover the loss of the face value of an asset following a credit event. A credit event is a
+legally defined event that typically includes bankruptcy, failure-to-pay and restructuring. This protection lasts until some specified maturity date. To pay for this protection, the protection buyer makes a regular stream of payments, known as the premium leg, to the protection seller. This size of these premium payments is calculated from a quoted default swap spread which is paid on the face value of the protection. These payments are made until a credit event occurs or until maturity, whichever occurs first.
+
+\bold{Modeling Credit Using a Reduced-Form Approach}
+The world of credit modelling is divided into two main approaches, one called the structural and the other called the reduced-form. In the structural approach, the idea is to characterize the default as being the consequence of some company event such as its asset value being insufficient to cover a repayment of debt.
+
+Structural models are generally used to say at what spread corporate bonds should trade based on the internal structure of the firm. They therefore require information about the balance sheet of the firm and can be used to establish a link between pricing in the equity and debt markets. However, they are limited 
+in at least three important ways: they are hard to calibrate because internal company data is only published at most four times a year; they generally lack the flexibility to fit exactly a given term structure of spreads; and they cannot be easily extended to price credit derivatives.
+
+In the reduced-form approach, the credit event process is modeled directly by modeling the probability of the credit event itself. Using a security pricing model based on this approach, this probability of default can be extracted from market prices. Reduced form models also generally have the flexibility to refit the prices of a variety of credit instruments of different maturities. They can also be extended to price more exotic credit derivatives. It is for these reasons that they are used for credit derivative pricing.
+
+See \code{vignette("credule")} for more details.
+
 }
 \usage{
-priceCDS(yieldcurveTenor,
-		 yieldcurveRate,
-		 creditcurveTenor,
-		 creditcurveSP,
-		 cdsTenors,
-		 recoveryRate,
-		 numberPremiumPerYear = c(4,2,1,12),
-		 numberDefaultIntervalPerYear = 12,
-		 accruedPremium = c(TRUE,FALSE)) 
+priceCDS(yieldcurveTenor, yieldcurveRate, creditcurveTenor, creditcurveSP,
+		 cdsTenors, recoveryRate, numberPremiumPerYear = c(4,2,1,12),
+		 numberDefaultIntervalPerYear = 12, accruedPremium = c(TRUE,FALSE)) 
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -80,4 +89,5 @@ priceCDS(yieldcurveTenor,
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{CDS, Credit Default Swap, pricing}
+\keyword{ Credit Default Swap, Credit Default Swaps, CDS, spread, survival probability, survival probabilities, default probability, default probabilities, pricing, credit curve, bootstrapping, hazard rate, poisson process}
+
