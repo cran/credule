@@ -34,7 +34,18 @@ Note. I'm planning to update this package with proper CDS ISDA conventions handl
 Bertrand Le Nezet
 Maintainer: Bertrand Le Nezet <bertrand dot lenezet at gmail dot com>
 }
-\keyword{ Credit Default Swap, Credit Default Swaps, CDS, spread, survival probability, survival probabilities, default probability, default probabilities, pricing, credit curve, bootstrapping, hazard rate, poisson process}
+\concept{Credit Default Swap}
+\concept{Credit Default Swaps}
+\concept{CDS spread}
+\concept{survival probability}
+\concept{survival probabilities}
+\concept{default probability}
+\concept{default probabilities}
+\concept{pricing}
+\concept{credit curve}
+\concept{bootstrapping}
+\concept{hazard rate}
+\concept{poisson process}
 \examples{
 library(credule)
 

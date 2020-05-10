@@ -87,4 +87,15 @@ bootstrapCDS(yieldcurveTenor,
 }
 % Add one or more standard keywords, see file 'KEYWORDS' in the
 % R documentation directory.
-\keyword{ Credit Default Swap, Credit Default Swaps, CDS, spread, survival probability, survival probabilities, default probability, default probabilities, pricing, credit curve, bootstrapping, hazard rate, poisson process}
+\concept{Credit Default Swap}
+\concept{Credit Default Swaps}
+\concept{CDS spread}
+\concept{survival probability}
+\concept{survival probabilities}
+\concept{default probability}
+\concept{default probabilities}
+\concept{pricing}
+\concept{credit curve}
+\concept{bootstrapping}
+\concept{hazard rate}
+\concept{poisson process}
